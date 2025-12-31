@@ -1,38 +1,45 @@
+import requests
 import json
 
-def process_product(product):
-    """
-    Validates and transforms product data from Fake Store API
-    """
+URL = "https://dummyjson.com/products/1"
 
-    required_fields = ["id", "title", "price", "category", "rating"]
+def get_product(product_id: int):
+    response = requests.get(f"https://dummyjson.com/products/{product_id}")
+    response.raise_for_status()
+    return response.json()
 
-    for field in required_fields:
-        if field not in product:
-            raise ValueError(f"Missing required field: {field}")
-
-    rating = product.get("rating", {})
-    rate = rating.get("rate", 0)
-    count = rating.get("count", 0)
-
-    processed = {
-        "product_id": product["id"],
-        "title": product["title"].strip(),
+def analyze_product(product: dict) -> dict:
+    return {
+        "product": product["title"],
         "category": product["category"],
-        "price_usd": round(float(product["price"]), 2),
-        "rating_score": rate,
-        "rating_count": count,
-        "is_high_value": product["price"] > 100,
-        "is_popular": count > 200
+        "price": product["price"],
+        "rating": product["rating"],
+        "stock": product["stock"],
+        "is_high_value": product["price"] > 50,
+        "is_popular": product["rating"] >= 4.0
     }
 
-    return processed
-
+def format_output(data: dict) -> str:
+    return (
+        f"product: {data['product']}\n"
+        f"category: {data['category']}\n"
+        f"price: ${data['price']}\n"
+        f"rating: {data['rating']}\n"
+        f"stock: {data['stock']}\n"
+        f"high_value: {data['is_high_value']}\n"
+        f"popular: {data['is_popular']}"
+    )
 
 if __name__ == "__main__":
-    # Example usage for local testing
-    with open("sample_product.json") as f:
-        product_data = json.load(f)
-
-    result = process_product(product_data)
-    print(json.dumps(result, indent=2))
+    product = get_product(1)
+    analysis = analyze_product(product)
+    
+    # Write YAML format
+    with open("sample_product.yaml", "w") as f:
+        f.write(format_output(analysis))
+    
+    # Write JSON format
+    with open("sample_product.json", "w") as f:
+        json.dump(analysis, f, indent=2)
+    
+    print("Output written to sample_product.yaml and sample_product.json")
