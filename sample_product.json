@@ -1,0 +1,10 @@
+{
+  "id": 1,
+  "title": "Fjallraven Backpack",
+  "price": 109.95,
+  "category": "men's clothing",
+  "rating": {
+    "rate": 4.5,
+    "count": 350
+  }
+}
